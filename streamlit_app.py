@@ -29,23 +29,24 @@ if uploaded_image is not None:
     image = Image.open(uploaded_image).convert('RGB')
     st.image(image, caption='Uploaded Image', use_column_width=True)
     
-    class_name = ['Sunny', 'Cloudy', 'Maybe rain']
+    # Check the type of image
+    if not isinstance(image, Image.Image):
+        st.error("Uploaded file is not a valid image.")
+        st.stop()
+    
+    # Prediction button
+    if st.button('Prediction'):
+        try:
+            probli, class_names = pred_class(model, image, class_name)
+            st.write("## Prediction Result")
+            
+            class_name = ['Sunny', 'Cloudy', 'Maybe rain']
+            
+            max_index = np.argmax(probli.numpy())  # Convert tensor to numpy for argmax
+            for i in range(len(class_name)):
+                color = "blue" if i == max_index else None
+                st.write(f"## <span style='color:{color}'>{class_name[i]} : {probli[i].item()*100:.2f}%</span>", unsafe_allow_html=True)
+        except Exception as e:
+            st.error(f"Error during prediction: {e}")
+            st.stop()
 
-    if st.button('Predict'):
-        # Preprocess the image if required
-        # image_tensor = preprocess_image(image) # Example of preprocessing
-        
-        # Prediction class
-        probli = pred_class(model, image, class_name)
-
-        st.write("## Prediction Result")
-        
-        # Get the index of the maximum value in probli[0]
-        max_index = np.argmax(probli[0])
-
-        # Iterate over the class_name and probli lists
-        for i in range(len(class_name)):
-            # Set the color to blue if it's the maximum value, otherwise use the default color
-            color = "blue" if i == max_index else None
-            # Use Markdown for styling
-            st.markdown(f"### <span style='color:{color}'>{class_name[i]} : {probli[0][i]*100:.2f}%</span>", unsafe_allow_html=True)
