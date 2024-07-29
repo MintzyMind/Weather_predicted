@@ -3,8 +3,6 @@ import torch
 from PIL import Image
 import numpy as np
 from prediction import pred_class
-import os
-
 
 # Set title 
 st.title('Weather Prediction')
@@ -13,22 +11,15 @@ st.title('Weather Prediction')
 st.header('Please upload a picture')
 
 # Load Model 
+
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 model_path = 'mobilenetv3_large_100_checkpoint_fold0.pt'
 
-if not os.path.isfile(model_path):
-    st.error(f"Model file not found: {model_path}")
-    st.stop()  # Stop the Streamlit app if the model file is not found
-
 try:
     model = torch.load(model_path, map_location=device)
-    model.eval()  # Set the model to evaluation mode
-    st.write("Model loaded successfully.")
+    print("Model loaded successfully.")
 except Exception as e:
-    st.error(f"Error loading model: {e}")
-    st.stop()  # Stop the Streamlit app if the model cannot be loaded
-
-
+    print(f"Error loading model: {e}")
     
 # Display image & Prediction 
 uploaded_image = st.file_uploader('Choose an image', type=['jpg', 'jpeg', 'png'])
