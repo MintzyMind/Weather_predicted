@@ -16,7 +16,7 @@ if not os.path.isfile(model_path):
     st.error(f"Model file not found: {model_path}")
 else:
     model = torch.load(model_path, map_location=device)
-
+    
 # Display image & Prediction 
 uploaded_image = st.file_uploader('Choose an image', type=['jpg', 'jpeg', 'png'])
 
