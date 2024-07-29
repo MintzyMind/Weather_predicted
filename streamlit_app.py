@@ -13,7 +13,14 @@ st.header('Please upload a picture')
 
 # Load Model 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-model = torch.load('mobilenetv3_large_100_checkpoint_fold0.pt', map_location=device)
+model_path = 'mobilenetv3_large_100_checkpoint_fold0.pt'
+
+try:
+    model = torch.load(model_path, map_location=device)
+    print("Model loaded successfully.")
+except Exception as e:
+    print(f"Error loading model: {e}")
+
     
 # Display image & Prediction 
 uploaded_image = st.file_uploader('Choose an image', type=['jpg', 'jpeg', 'png'])
