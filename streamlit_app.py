@@ -5,7 +5,7 @@ from prediction import pred_class
 import numpy as np
 
 # Set title 
-st.title('Weather Classification')
+st.title('Weather Predicted')
 
 #Set Header 
 st.header('Please up load picture')
@@ -13,12 +13,9 @@ st.header('Please up load picture')
 
 #Load Model 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-import torch
+model = torch.load('mobilenetv3_large_100_checkpoint_fold0.pt', map_location=device)
 
-try:
-    model = torch.load('mobilenetv3_large_100_checkpoint_fold0 (1).pt', map_location=device)
-except Exception as e:
-    print(f"Error loading model: {e}")
+
 
 # Display image & Prediction 
 uploaded_image = st.file_uploader('Choose an image', type=['jpg', 'jpeg', 'png'])
