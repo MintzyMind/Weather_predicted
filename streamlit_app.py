@@ -3,6 +3,7 @@ import torch
 from PIL import Image
 import numpy as np
 from prediction import pred_class
+import os
 
 
 # Set title 
