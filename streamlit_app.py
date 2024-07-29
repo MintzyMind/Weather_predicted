@@ -15,11 +15,18 @@ st.header('Please upload a picture')
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 model_path = 'mobilenetv3_large_100_checkpoint_fold0.pt'
 
+if not os.path.isfile(model_path):
+    st.error(f"Model file not found: {model_path}")
+    st.stop()  # Stop the Streamlit app if the model file is not found
+
 try:
     model = torch.load(model_path, map_location=device)
-    print("Model loaded successfully.")
+    model.eval()  # Set the model to evaluation mode
+    st.write("Model loaded successfully.")
 except Exception as e:
-    print(f"Error loading model: {e}")
+    st.error(f"Error loading model: {e}")
+    st.stop()  # Stop the Streamlit app if the model cannot be loaded
+
 
     
 # Display image & Prediction 
