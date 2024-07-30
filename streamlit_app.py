@@ -50,3 +50,4 @@ if uploaded_image is not None:
                 st.write(f"## <span style='color:{color}'>{class_name[i]}: {probli[0][i]*100:.2f}%</span>", unsafe_allow_html=True)
         except Exception as e:
             st.error(f"Error during prediction: {e}")
+
