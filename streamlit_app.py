@@ -13,7 +13,7 @@ st.header('Please upload a picture')
 # Load Model 
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-model_path = 'mobilenetv3_large_100_checkpoint_fold0.pt'
+model_path = 'mobilenetv3_large_100_checkpoint_fold1.pt'
 
 try:
     model = torch.load(model_path, map_location=device)
