@@ -1,43 +1,64 @@
-import streamlit as st 
+import streamlit as st
 import torch
+import torchvision.transforms as T
 from PIL import Image
-from prediction import pred_class
-import numpy as np
+import timm
 
-# Set title 
-st.title('Weather Prediction')
+# Load your trained model checkpoint
+model_path = "C:\Users\ACER PREDATOR\Downloads\mobilenetv3_large_100_checkpoint_fold1.pt"
 
-#Set Header 
-st.header('Please up load picture')
+# Define the MobileNetV3 model from timm with the desired precision
+model = timm.create_model('mobilenetv3_large_100', pretrained=False, num_classes=3).to(dtype=torch.float32)
 
+# Load the checkpoint
+checkpoint = torch.load(model_path, map_location=torch.device('cpu'))
 
-#Load Model 
-device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-model = torch.load('mobilenetv3_large_100_checkpoint_fold1.pt', map_location=device)
+# Extract the state dictionary from the checkpoint
+state_dict = checkpoint.state_dict() if isinstance(checkpoint, torch.nn.Module) else checkpoint
 
+# Load the state dictionary into the model
+model.load_state_dict(state_dict)
 
+# Set the model to evaluation mode
+model.eval()
 
-# Display image & Prediction 
-uploaded_image = st.file_uploader('Choose an image', type=['jpg', 'jpeg', 'png'])
+# Preprocessing steps (same as before)
+preprocess = T.Compose([
+    T.Resize((224, 224)),
+    T.ToTensor(),
+    T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+])
 
-if uploaded_image is not None:
-    image = Image.open(uploaded_image).convert('RGB')
+# List of class names
+class_names = [
+     "Cloudy", "May_Be_Rain", "Sunny"   
+]
+
+# Create a function to make predictions
+def predict(image):
+    img = Image.open(image).convert('RGB')
+    img = preprocess(img).unsqueeze(0).float()  # Convert to float32 explicitly
+    with torch.no_grad():
+        model.eval()
+        prediction = model(img)
+        predicted_class = torch.argmax(prediction).item()
+        confidence = torch.softmax(prediction, dim=1)[0][predicted_class].item() * 100
+        return predicted_class, confidence
+
+# Streamlit app
+st.title('Weather Predict App')
+
+# File uploader
+uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "png", "jpeg"])
+
+if uploaded_file is not None:
+    # Display the uploaded image
+    image = Image.open(uploaded_file)
     st.image(image, caption='Uploaded Image', use_column_width=True)
-    
-    class_name = ['Sunny', 'Cloudy', 'Maybe rain']
 
-
-    if st.button('Prediction'):
-        #Prediction class
-        probli = pred_class(model,image,class_name)
-        
-        st.write("## Prediction Result")
-        # Get the index of the maximum value in probli[0]
-        max_index = np.argmax(probli[0])
-
-        # Iterate over the class_name and probli lists
-        for i in range(len(class_name)):
-            # Set the color to blue if it's the maximum value, otherwise use the default color
-            color = "blue" if i == max_index else None
-            st.write(f"## <span style='color:{color}'>{class_name[i]} : {probli[0][i]*100:.2f}%</span>", unsafe_allow_html=True)
-
+    # Make predictions on the uploaded image
+    if st.button('Predict'):
+        label, confidence = predict(uploaded_file)
+        class_label = class_names[label]
+        st.write(f"Predicted Class: {class_label}")
+        st.write(f"Accuracy: {confidence:.2f}%")
